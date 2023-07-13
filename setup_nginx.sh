@@ -98,6 +98,16 @@ function setup_dependencies() {
     done
 }
 
+function install_scripts() {
+    echo -e "\n==> Installing scripts to manage server blocks..."
+    scripts=('e2ensite' 'e2dissite')
+    for script in ${scripts[@]}; do
+        chmod +x "./scripts/$script"
+        sudo cp "./scripts/$script" "/usr/local/bin"
+    done
+    echo -e "\n==> Scripts installed successfully...\n"
+}
+
 function main() {
     setup_dependencies
     verify_exec
@@ -105,6 +115,7 @@ function main() {
     setup_new_document_root
     enable_default_server_block
     restart_nginx
+    install_scripts
 }
 
 main "$@"
