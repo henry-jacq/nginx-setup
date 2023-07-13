@@ -17,6 +17,8 @@ if [[ -L "$sites_enabled/$site_to_disable" ]]; then
 	echo "Disabling site $site_to_disable..."
 	sudo unlink "$sites_enabled/$site_to_disable"
 	echo "Site $site_to_disable is disabled!"
+	echo -e "\nRestart the web server:"
+	echo -e "    sudo systemctl restart nginx"
 else
 	echo "Site $site_to_disable not available!"
 	exit 1
