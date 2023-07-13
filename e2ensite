@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# This script will enable server blocks
+# Usage: e2ensite <block-to-enable>
+
+sites_available="/etc/nginx/sites-available"
+sites_enabled="/etc/nginx/sites-enabled"
+site_to_enable=$1
+
+if [[ $site_to_enable == '' ]]; then
+	echo "Usage: $0 <block-name>"
+	exit 1
+fi
+
+if [[ -L "$sites_enabled/$site_to_enable" ]]; then
+	echo "Site $site_to_enable is already enabled!"
+	exit 1
+fi
+
+if [[ -f "$sites_available/$site_to_enable" ]]; then
+	echo "Enabling site $site_to_enable..."
+	sudo ln -s "$sites_available/$site_to_enable" "$sites_enabled/$site_to_enable"
+	echo "Site $site_to_enable enabled!"
+else
+	echo "Site $site_to_enable is not available!"
+	exit 1
+fi

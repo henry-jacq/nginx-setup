@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# This script will disable server blocks
+# Usage: e2dissite <block-to-disable>
+
+sites_available="/etc/nginx/sites-available"
+sites_enabled="/etc/nginx/sites-enabled"
+site_to_disable=$1
+
+
+if [[ $site_to_disable == '' ]]; then
+	echo "Usage: $0 <block-name>"
+	exit 1
+fi
+
+if [[ -L "$sites_enabled/$site_to_disable" ]]; then
+	echo "Disabling site $site_to_disable..."
+	sudo unlink "$sites_enabled/$site_to_disable"
+	echo "Site $site_to_disable is disabled!"
+else
+	echo "Site $site_to_disable not available!"
+	exit 1
+fi
