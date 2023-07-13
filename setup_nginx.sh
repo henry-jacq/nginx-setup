@@ -10,73 +10,77 @@ default_error_page="/usr/share/nginx/html/50x.html"
 default_server_block="000-default.conf"
 
 
-# Check if the script running on a arch system
-if [[ ! -f "/etc/arch-release" ]]; then
-    echo "==> This script works on arch-based system only!"
-    exit -1
-fi
-
-echo -e "\n==> Setting up nginx...\n"
-
-echo -e "==> Creating server entries...\n"
-
-if [[ ! -d "$serv_avail" ]]; then
-    sudo mkdir -p $serv_avail
-fi
-
-if [[ ! -d "$serv_enabled" ]]; then
-    sudo mkdir -p $serv_enabled
-fi
-
-sleep 0.5
-
-echo -e "==> Creating new document root '$new_doc_root'\n"
-if [[ ! -d "$new_doc_root" ]]; then
-    sudo mkdir -p $new_doc_root
-fi
-
-sleep 0.5
-
-echo -e "==> Adding files to new document root...\n"
-if [[ -f $default_page ]]; then
-    sudo mv $default_page $new_doc_root
-fi
-
-if [[ -f $default_error_page ]]; then
-    sudo mv $default_error_page $new_doc_root
-fi
-
-sleep 1
-
-echo -e "==> Files added to new document root!\n"
-
-echo -e "==> Updating nginx configuration...\n"
-if [[ -f "./nginx.conf" ]]; then
-    sudo cp ./nginx.conf /etc/nginx/nginx.conf
-fi
-
-sleep 1
-
-echo -e "==> Copying default server block...\n"
-if [[ -f "./$default_server_block" ]]; then
-    sudo cp "./$default_server_block" $serv_avail
-fi
-
-echo -e "==> Enabling default server block...\n"
-if [[ -f "$serv_avail/$default_server_block" ]]; then
-    if [[ ! -f "$serv_enabled/$default_server_block" ]]; then
-        sudo ln -s "$serv_avail/$default_server_block" "$serv_enabled/$default_server_block"
-    else
-        echo -e "==> Default server block already enabled!\n"
+function verify_exec() {
+    # Check if the script running on a arch system
+    if [[ ! -f "/etc/arch-release" ]]; then
+        echo "==> This script works on arch-based system only!"
+        exit -1
     fi
-fi
+}
 
-sleep 0.5
+function initial_setup() {
+    echo -e "\n==> Setting up nginx...\n"
+    echo -e "==> Creating server entries...\n"
 
-echo -e "==> Restarting nginx server...\n"
-sudo systemctl restart nginx
+    if [[ ! -d "$serv_avail" ]]; then
+        sudo mkdir -p $serv_avail
+    fi
 
-echo -e "==> Nginx setup installed successfully!\n"
+    if [[ ! -d "$serv_enabled" ]]; then
+        sudo mkdir -p $serv_enabled
+    fi
+
+    sleep 0.5
+}
+
+function setup_new_document_root() {
+    echo -e "==> Creating new document root '$new_doc_root'\n"
+    if [[ ! -d "$new_doc_root" ]]; then
+        sudo mkdir -p $new_doc_root
+    fi
+    sleep 0.5
+
+    echo -e "==> Adding files to new document root...\n"
+    if [[ -f $default_page ]]; then
+        sudo mv $default_page $new_doc_root
+    fi
+    if [[ -f $default_error_page ]]; then
+        sudo mv $default_error_page $new_doc_root
+    fi
+
+    echo -e "==> Updating nginx configuration...\n"
+    if [[ -f "./nginx.conf" ]]; then
+        sudo cp ./nginx.conf /etc/nginx/nginx.conf
+    fi
+    sleep 1
+
+    echo -e "==> Files added to new document root!\n"
+    sleep 1
+}
+
+function enable_default_server_block() {
+    echo -e "==> Copying default server block...\n"
+    if [[ -f "./$default_server_block" ]]; then
+        sudo cp "./$default_server_block" $serv_avail
+    fi
+
+    echo -e "==> Enabling default server block...\n"
+    if [[ -f "$serv_avail/$default_server_block" ]]; then
+        if [[ ! -f "$serv_enabled/$default_server_block" ]]; then
+            sudo ln -s "$serv_avail/$default_server_block" "$serv_enabled/$default_server_block"
+        else
+            echo -e "==> Default server block already enabled!\n"
+        fi
+    fi
+
+    sleep 0.5
+}
+
+function restart_nginx() {
+    echo -e "==> Restarting nginx server...\n"
+    sudo systemctl restart nginx
+    echo -e "==> Nginx setup installed successfully!\n"
+}
 
 function setup_dependencies() {
 
@@ -86,8 +90,17 @@ function setup_dependencies() {
 
     for package in ${packages[@]}; do
         echo -e "\n==> Installing ${package}...\n"
-        sudo pacman -S $package --noconfirm
+        sudo pacman -S $package --noconfirm > /dev/null
     done
 }
 
-setup_dependencies
+function main() {
+    setup_dependencies
+    verify_exec
+    initial_setup
+    setup_new_document_root
+    enable_default_server_block
+    restart_nginx
+}
+
+main "$@"
