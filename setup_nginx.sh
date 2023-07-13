@@ -90,7 +90,7 @@ function setup_dependencies() {
 
     echo -e "\n==> Setting up dependencies...\n"
 
-    packages=('nginx-mainline' 'php')
+    packages=('nginx-mainline' 'php' 'php-fpm')
 
     for package in ${packages[@]}; do
         echo -e "\n==> Installing ${package}...\n"
