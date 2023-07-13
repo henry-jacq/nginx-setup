@@ -7,7 +7,8 @@ serv_enabled="/etc/nginx/sites-enabled"
 new_doc_root="/var/www/html"
 default_page="/usr/share/nginx/html/index.html"
 default_error_page="/usr/share/nginx/html/50x.html"
-default_server_block="000-default.conf"
+default_server_block="./conf/000-default.conf"
+default_server_block_name="000-default.conf"
 
 
 function verify_exec() {
@@ -49,8 +50,11 @@ function setup_new_document_root() {
     fi
 
     echo -e "==> Updating nginx configuration...\n"
-    if [[ -f "./nginx.conf" ]]; then
-        sudo cp ./nginx.conf /etc/nginx/nginx.conf
+    if [[ -f "./conf/nginx.conf" ]]; then
+        sudo cp ./conf/nginx.conf /etc/nginx/nginx.conf
+    else
+        echo -e "\n==> Nginx config not found!\n"
+        exit -1
     fi
     sleep 1
 
@@ -60,14 +64,14 @@ function setup_new_document_root() {
 
 function enable_default_server_block() {
     echo -e "==> Copying default server block...\n"
-    if [[ -f "./$default_server_block" ]]; then
-        sudo cp "./$default_server_block" $serv_avail
+    if [[ -f "$default_server_block" ]]; then
+        sudo cp "$default_server_block" $serv_avail
     fi
 
     echo -e "==> Enabling default server block...\n"
-    if [[ -f "$serv_avail/$default_server_block" ]]; then
-        if [[ ! -f "$serv_enabled/$default_server_block" ]]; then
-            sudo ln -s "$serv_avail/$default_server_block" "$serv_enabled/$default_server_block"
+    if [[ -f "$serv_avail/$default_server_block_name" ]]; then
+        if [[ ! -f "$serv_enabled/$default_server_block_name" ]]; then
+            sudo ln -s "$serv_avail/$default_server_block_name" "$serv_enabled/$default_server_block_name"
         else
             echo -e "==> Default server block already enabled!\n"
         fi
