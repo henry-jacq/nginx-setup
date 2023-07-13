@@ -77,3 +77,17 @@ echo -e "==> Restarting nginx server...\n"
 sudo systemctl restart nginx
 
 echo -e "==> Nginx setup installed successfully!\n"
+
+function setup_dependencies() {
+
+    echo -e "\n==> Setting up dependencies...\n"
+
+    packages=('nginx-mainline' 'php')
+
+    for package in ${packages[@]}; do
+        echo -e "\n==> Installing ${package}...\n"
+        sudo pacman -S $package --noconfirm
+    done
+}
+
+setup_dependencies
